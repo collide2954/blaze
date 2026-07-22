@@ -12,6 +12,9 @@
 #' check(1L, t_int())
 check <- function(value, type) {
   msg <- blaze_check_base(value, type@base)
+  if (is.null(msg)) {
+    msg <- blaze_check_length(value, type@len)
+  }
   if (!is.null(msg)) {
     stop(msg, call. = FALSE)
   }

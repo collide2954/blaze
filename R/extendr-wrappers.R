@@ -10,4 +10,9 @@ NULL
 #' @noRd
 blaze_check_base <- function(value, expected) .Call(wrap__blaze_check_base, value, expected)
 
+#' Check the length of `value` against `expected` (empty means no constraint),
+#' returning `NULL` on a match or a message describing the mismatch.
+#' @noRd
+blaze_check_length <- function(value, expected) .Call(wrap__blaze_check_length, value, expected)
+
 # nolint end

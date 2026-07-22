@@ -27,10 +27,22 @@ fn blaze_check_base(value: Robj, expected: &str) -> Robj {
     }
 }
 
+/// Check the length of `value` against `expected` (empty means no constraint),
+/// returning `NULL` on a match or a message describing the mismatch.
+/// @noRd
+#[extendr]
+fn blaze_check_length(value: Robj, expected: Vec<i32>) -> Robj {
+    match check::length_violation(value.len(), &expected) {
+        Some(msg) => msg.into(),
+        None => ().into(),
+    }
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod blaze;
     fn blaze_check_base;
+    fn blaze_check_length;
 }

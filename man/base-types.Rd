@@ -11,28 +11,33 @@
 \alias{t_list}
 \title{Base type constructors}
 \usage{
-t_int()
+t_int(len = NULL)
 
-t_dbl()
+t_dbl(len = NULL)
 
-t_chr()
+t_chr(len = NULL)
 
-t_lgl()
+t_lgl(len = NULL)
 
-t_cpl()
+t_cpl(len = NULL)
 
-t_raw()
+t_raw(len = NULL)
 
-t_list()
+t_list(len = NULL)
+}
+\arguments{
+\item{len}{Optional exact length the value must have.}
 }
 \value{
 A \code{blaze_type} object.
 }
 \description{
 Each constructor returns a \code{blaze_type} describing an R vector of a single
-base type, named as \code{\link[=typeof]{typeof()}} reports it.
+base type, named as \code{\link[=typeof]{typeof()}} reports it. Pass \code{len} to require an exact
+length; for example \code{t_int(1)} is a length-1 integer.
 }
 \examples{
 t_int()
+t_int(1)
 t_chr()
 }
