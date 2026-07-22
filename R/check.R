@@ -11,6 +11,9 @@
 #' @examples
 #' check(1L, t_int())
 check <- function(value, type) {
+  if (is.null(value) && type@optional) {
+    return(invisible(value))
+  }
   msg <- blaze_check_base(value, type@base)
   if (is.null(msg)) {
     msg <- blaze_check_length(value, type@len_min, type@len_max)

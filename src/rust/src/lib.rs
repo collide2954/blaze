@@ -12,6 +12,7 @@ fn typeof_str(value: &Robj) -> &'static str {
         Rtype::Complexes => "complex",
         Rtype::Raw => "raw",
         Rtype::List => "list",
+        Rtype::Null => "NULL",
         _ => "other",
     }
 }
