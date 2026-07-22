@@ -5,10 +5,6 @@
 #' @useDynLib blaze, .registration = TRUE
 NULL
 
-#' Return string `"Hello world!"` to R.
-#' @export
-hello_world <- function() .Call(wrap__hello_world)
-
 #' Check the base type of `value` against `expected`, returning `NULL` on a
 #' match or a message describing the mismatch.
 #' @noRd

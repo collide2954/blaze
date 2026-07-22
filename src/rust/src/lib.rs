@@ -2,13 +2,6 @@ use extendr_api::prelude::*;
 
 mod check;
 
-/// Return string `"Hello world!"` to R.
-/// @export
-#[extendr]
-fn hello_world() -> &'static str {
-    "Hello world!"
-}
-
 /// Name the base type of `value` as `typeof()` reports it.
 fn typeof_str(value: &Robj) -> &'static str {
     match value.rtype() {
@@ -39,6 +32,5 @@ fn blaze_check_base(value: Robj, expected: &str) -> Robj {
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod blaze;
-    fn hello_world;
     fn blaze_check_base;
 }
