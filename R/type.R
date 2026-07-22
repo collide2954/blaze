@@ -8,7 +8,11 @@ blaze_type <- S7::new_class(
     optional = S7::new_property(S7::class_logical, default = FALSE),
     refinements = S7::class_list,
     columns = S7::class_list,
-    invariants = S7::class_list
+    invariants = S7::class_list,
+    class_name = S7::class_character,
+    levels = S7::class_character,
+    element = S7::class_list,
+    alternatives = S7::class_list
   )
 )
 
@@ -88,6 +92,18 @@ where <- function(type, ...) {
   type
 }
 
+# Composite types. Their type arguments (element, alternatives) evaluate in the
+# same vocabulary, so they arrive already built.
+t_any <- function() blaze_type(base = "any")
+
+cls <- function(class) blaze_type(base = "class", class_name = class)
+
+fct <- function(levels) blaze_type(base = "factor", levels = as.character(levels))
+
+list_of <- function(element) blaze_type(base = "list_of", element = list(element))
+
+one_of <- function(...) blaze_type(base = "union", alternatives = list(...))
+
 # The type vocabulary. Terse names resolve to the constructors above only when a
 # type expression is evaluated by fn(), check(), or type(), so they never clash
 # with user or package bindings at the top level.
@@ -97,7 +113,8 @@ type_vocab <- list(
   na_ok = t_na_ok, opt = t_opt,
   nonneg = nonneg, between = in_range, matches = regex,
   unique_vals = unique_vals, nchar_between = nchar_between,
-  frame = frame, where = where
+  frame = frame, where = where,
+  any = t_any, fct = fct, list_of = list_of, one_of = one_of, cls = cls
 )
 
 #' The blaze type vocabulary
@@ -123,12 +140,16 @@ type_vocab <- list(
 #' conforming to its column type. Add row or cross-column invariants with
 #' `where()`, for example `frame(lo = int(), hi = int()) |> where(lo <= hi)`.
 #'
+#' Composite types combine others: `any()` accepts anything, `cls("Date")` checks
+#' an object's class, `fct(levels)` a factor, `list_of(int())` a list whose
+#' elements share a type, and `one_of(int(), chr())` a union.
+#'
 #' Use [blaze_types()] to list the vocabulary.
 #'
 #' @param expr A type expression such as `int() |> between(0, 1)`.
 #' @return A `blaze_type`.
 #' @aliases int dbl chr lgl cpl raw lst na_ok opt nonneg between matches
-#'   unique_vals nchar_between frame where
+#'   unique_vals nchar_between frame where any fct list_of one_of cls
 #' @export
 #' @examples
 #' pos_int <- type(int() |> nonneg())

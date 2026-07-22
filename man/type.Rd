@@ -18,6 +18,11 @@
 \alias{nchar_between}
 \alias{frame}
 \alias{where}
+\alias{any}
+\alias{fct}
+\alias{list_of}
+\alias{one_of}
+\alias{cls}
 \title{The blaze type vocabulary}
 \usage{
 type(expr)
@@ -50,6 +55,10 @@ A data-frame schema is a type too: \code{frame(id = int(), age = int() |> nonneg
 checks that a value is a data frame carrying the named columns, each
 conforming to its column type. Add row or cross-column invariants with
 \code{where()}, for example \code{frame(lo = int(), hi = int()) |> where(lo <= hi)}.
+
+Composite types combine others: \code{any()} accepts anything, \code{cls("Date")} checks
+an object's class, \code{fct(levels)} a factor, \code{list_of(int())} a list whose
+elements share a type, and \code{one_of(int(), chr())} a union.
 
 Use \code{\link[=blaze_types]{blaze_types()}} to list the vocabulary.
 }

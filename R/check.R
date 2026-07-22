@@ -31,9 +31,18 @@ check_msg <- function(value, type) {
   if (is.null(value) && type@optional) {
     return(NULL)
   }
-  if (identical(type@base, "data.frame")) {
-    return(check_frame(value, type))
-  }
+  switch(type@base,
+    any = NULL,
+    data.frame = check_frame(value, type),
+    factor = check_fct(value, type),
+    list_of = check_list_of(value, type),
+    union = check_union(value, type),
+    class = check_class(value, type),
+    check_scalar(value, type)
+  )
+}
+
+check_scalar <- function(value, type) {
   msg <- blaze_check_base(value, type@base)
   if (is.null(msg)) {
     msg <- blaze_check_length(value, type@len_min, type@len_max)
@@ -45,6 +54,48 @@ check_msg <- function(value, type) {
     msg <- check_refinements(value, type@refinements)
   }
   msg
+}
+
+check_fct <- function(value, type) {
+  if (!is.factor(value)) {
+    return(sprintf("expected a factor, got %s", class(value)[1]))
+  }
+  extra <- setdiff(levels(value), type@levels)
+  if (length(extra) > 0L) {
+    return(sprintf("unexpected factor levels: %s", paste(extra, collapse = ", ")))
+  }
+  NULL
+}
+
+check_class <- function(value, type) {
+  if (!inherits(value, type@class_name)) {
+    return(sprintf("expected an object of class `%s`", type@class_name))
+  }
+  NULL
+}
+
+check_list_of <- function(value, type) {
+  if (!is.list(value) || is.data.frame(value)) {
+    return(sprintf("expected a list, got %s", class(value)[1]))
+  }
+  element <- type@element[[1]]
+  for (i in seq_along(value)) {
+    msg <- check_msg(value[[i]], element)
+    if (!is.null(msg)) {
+      return(sprintf("element %d: %s", i, msg))
+    }
+  }
+  NULL
+}
+
+check_union <- function(value, type) {
+  for (alt in type@alternatives) {
+    if (is.null(check_msg(value, alt))) {
+      return(NULL)
+    }
+  }
+  bases <- vapply(type@alternatives, function(a) a@base, character(1))
+  sprintf("expected one of: %s", paste(bases, collapse = ", "))
 }
 
 check_frame <- function(value, type) {
