@@ -1,6 +1,6 @@
 Package: blaze
 Title: Strict Gradual Type Checking
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R:
     person("Brett", "Gilio", , "giliobrett@gmail.com", role = c("aut", "cre", "cph"))
 Description: A strict, opt-in type system for existing R code. Types are
