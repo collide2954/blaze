@@ -27,3 +27,21 @@ test_that("unique_vals() rejects duplicates", {
   expect_identical(check(c(1L, 2L, 3L), t_int() |> unique_vals()), c(1L, 2L, 3L))
   expect_error(check(c(1L, 2L, 2L), t_int() |> unique_vals()), "expected unique values")
 })
+
+test_that("regex() enforces a pattern", {
+  expect_identical(check(c("Ab", "Cd"), t_chr() |> regex("^[A-Z]")), c("Ab", "Cd"))
+  expect_error(check(c("Ab", "cd"), t_chr() |> regex("^[A-Z]")), "matching")
+})
+
+test_that("nchar_between() enforces string lengths", {
+  expect_identical(check(c("ab", "cde"), t_chr() |> nchar_between(1, 3)), c("ab", "cde"))
+  expect_error(
+    check(c("ab", "toolong"), t_chr() |> nchar_between(1, 3)),
+    "expected string lengths in \\[1, 3\\]"
+  )
+})
+
+test_that("regex() and nchar_between() ignore NA", {
+  expect_identical(check(c("Ab", NA), t_na_ok(t_chr()) |> regex("^[A-Z]")), c("Ab", NA))
+  expect_identical(check(c("ab", NA), t_na_ok(t_chr()) |> nchar_between(1, 3)), c("ab", NA))
+})

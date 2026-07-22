@@ -36,6 +36,8 @@ check_refinements <- function(value, refinements) {
       nonneg = blaze_check_nonneg(value),
       in_range = blaze_check_range(value, r$min, r$max),
       unique_vals = if (anyDuplicated(value)) "expected unique values" else NULL,
+      regex = refine_regex(value, r$pattern),
+      nchar_between = refine_nchar(value, r$min, r$max),
       stop("unknown refinement: ", r$kind)
     )
     if (!is.null(msg)) {
@@ -43,4 +45,21 @@ check_refinements <- function(value, refinements) {
     }
   }
   NULL
+}
+
+refine_regex <- function(value, pattern) {
+  if (all(grepl(pattern, value[!is.na(value)]))) {
+    NULL
+  } else {
+    sprintf("expected values matching %s", pattern)
+  }
+}
+
+refine_nchar <- function(value, min, max) {
+  lens <- nchar(value[!is.na(value)])
+  if (any(lens < min | lens > max)) {
+    sprintf("expected string lengths in [%d, %d]", min, max)
+  } else {
+    NULL
+  }
 }

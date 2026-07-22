@@ -2,7 +2,9 @@
 
 export(check)
 export(in_range)
+export(nchar_between)
 export(nonneg)
+export(regex)
 export(t_chr)
 export(t_cpl)
 export(t_dbl)

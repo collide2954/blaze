@@ -5,6 +5,8 @@
 \alias{nonneg}
 \alias{in_range}
 \alias{unique_vals}
+\alias{regex}
+\alias{nchar_between}
 \title{Refine a type with a predicate}
 \usage{
 nonneg(type)
@@ -12,11 +14,18 @@ nonneg(type)
 in_range(type, min, max)
 
 unique_vals(type)
+
+regex(type, pattern)
+
+nchar_between(type, min, max)
 }
 \arguments{
 \item{type}{A \code{blaze_type}.}
 
-\item{min, max}{Inclusive numeric bounds for \code{in_range()}.}
+\item{min, max}{Inclusive bounds: a numeric range for \code{in_range()}, or string
+lengths for \code{nchar_between()}.}
+
+\item{pattern}{A regular expression for \code{regex()}.}
 }
 \value{
 A \code{blaze_type} with the refinement added.

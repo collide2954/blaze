@@ -116,7 +116,8 @@ nonneg <- function(type) {
 }
 
 #' @rdname refinements
-#' @param min,max Inclusive numeric bounds for `in_range()`.
+#' @param min,max Inclusive bounds: a numeric range for `in_range()`, or string
+#'   lengths for `nchar_between()`.
 #' @export
 in_range <- function(type, min, max) {
   type@refinements <- c(
@@ -130,5 +131,23 @@ in_range <- function(type, min, max) {
 #' @export
 unique_vals <- function(type) {
   type@refinements <- c(type@refinements, list(list(kind = "unique_vals")))
+  type
+}
+
+#' @rdname refinements
+#' @param pattern A regular expression for `regex()`.
+#' @export
+regex <- function(type, pattern) {
+  type@refinements <- c(type@refinements, list(list(kind = "regex", pattern = pattern)))
+  type
+}
+
+#' @rdname refinements
+#' @export
+nchar_between <- function(type, min, max) {
+  type@refinements <- c(
+    type@refinements,
+    list(list(kind = "nchar_between", min = as.integer(min), max = as.integer(max)))
+  )
   type
 }
