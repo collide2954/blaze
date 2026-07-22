@@ -16,6 +16,7 @@
 \alias{matches}
 \alias{unique_vals}
 \alias{nchar_between}
+\alias{frame}
 \title{The blaze type vocabulary}
 \usage{
 type(expr)
@@ -43,6 +44,10 @@ Modifiers relax the defaults: \code{na_ok()} permits \code{NA}, \code{opt()} per
 Refinements add element-wise constraints, composed with the pipe: \code{nonneg()},
 \code{between(min, max)}, \code{matches(pattern)}, \code{unique_vals()},
 \code{nchar_between(min, max)}.
+
+A data-frame schema is a type too: \code{frame(id = int(), age = int() |> nonneg())}
+checks that a value is a data frame carrying the named columns, each
+conforming to its column type.
 
 Use \code{\link[=blaze_types]{blaze_types()}} to list the vocabulary.
 }

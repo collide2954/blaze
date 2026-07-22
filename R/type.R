@@ -6,7 +6,8 @@ blaze_type <- S7::new_class(
     len_max = S7::class_integer,
     na_ok = S7::new_property(S7::class_logical, default = FALSE),
     optional = S7::new_property(S7::class_logical, default = FALSE),
-    refinements = S7::class_list
+    refinements = S7::class_list,
+    columns = S7::class_list
   )
 )
 
@@ -73,6 +74,12 @@ nchar_between <- function(type, min, max) {
   type
 }
 
+# A data-frame schema. Column type expressions evaluate in the same vocabulary,
+# so `...` already holds the built column types.
+frame <- function(...) {
+  blaze_type(base = "data.frame", columns = list(...))
+}
+
 # The type vocabulary. Terse names resolve to the constructors above only when a
 # type expression is evaluated by fn(), check(), or type(), so they never clash
 # with user or package bindings at the top level.
@@ -81,7 +88,8 @@ type_vocab <- list(
   cpl = t_cpl, raw = t_raw, lst = t_list,
   na_ok = t_na_ok, opt = t_opt,
   nonneg = nonneg, between = in_range, matches = regex,
-  unique_vals = unique_vals, nchar_between = nchar_between
+  unique_vals = unique_vals, nchar_between = nchar_between,
+  frame = frame
 )
 
 #' The blaze type vocabulary
@@ -102,12 +110,16 @@ type_vocab <- list(
 #' `between(min, max)`, `matches(pattern)`, `unique_vals()`,
 #' `nchar_between(min, max)`.
 #'
+#' A data-frame schema is a type too: `frame(id = int(), age = int() |> nonneg())`
+#' checks that a value is a data frame carrying the named columns, each
+#' conforming to its column type.
+#'
 #' Use [blaze_types()] to list the vocabulary.
 #'
 #' @param expr A type expression such as `int() |> between(0, 1)`.
 #' @return A `blaze_type`.
 #' @aliases int dbl chr lgl cpl raw lst na_ok opt nonneg between matches
-#'   unique_vals nchar_between
+#'   unique_vals nchar_between frame
 #' @export
 #' @examples
 #' pos_int <- type(int() |> nonneg())

@@ -20,8 +20,19 @@ check <- function(value, type) {
 }
 
 check_value <- function(value, type) {
+  msg <- check_msg(value, type)
+  if (!is.null(msg)) {
+    stop(msg, call. = FALSE)
+  }
+  invisible(value)
+}
+
+check_msg <- function(value, type) {
   if (is.null(value) && type@optional) {
-    return(invisible(value))
+    return(NULL)
+  }
+  if (identical(type@base, "data.frame")) {
+    return(check_frame(value, type))
   }
   msg <- blaze_check_base(value, type@base)
   if (is.null(msg)) {
@@ -33,10 +44,23 @@ check_value <- function(value, type) {
   if (is.null(msg)) {
     msg <- check_refinements(value, type@refinements)
   }
-  if (!is.null(msg)) {
-    stop(msg, call. = FALSE)
+  msg
+}
+
+check_frame <- function(value, type) {
+  if (!is.data.frame(value)) {
+    return(sprintf("expected a data frame, got %s", class(value)[1]))
   }
-  invisible(value)
+  for (col in names(type@columns)) {
+    if (!col %in% names(value)) {
+      return(sprintf("missing column `%s`", col))
+    }
+    col_msg <- check_msg(value[[col]], type@columns[[col]])
+    if (!is.null(col_msg)) {
+      return(sprintf("column `%s`: %s", col, col_msg))
+    }
+  }
+  NULL
 }
 
 check_refinements <- function(value, refinements) {
