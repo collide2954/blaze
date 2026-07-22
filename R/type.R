@@ -22,103 +22,31 @@ new_base_type <- function(base, len = NULL, min = NULL, max = NULL) {
   )
 }
 
-#' Base type constructors
-#'
-#' Each constructor returns a `blaze_type` describing an R vector of a single
-#' base type, named as [typeof()] reports it. Constrain length with `len` for an
-#' exact length, or `min`/`max` for inclusive bounds; for example `t_int(1)` is a
-#' length-1 integer and `t_chr(min = 1)` is a non-empty character vector.
-#'
-#' @param len Optional exact length the value must have.
-#' @param min,max Optional inclusive length bounds.
-#' @return A `blaze_type` object.
-#' @name base-types
-#' @examples
-#' t_int()
-#' t_int(1)
-#' t_chr(min = 1)
-NULL
-
-#' @rdname base-types
-#' @export
+# Base type constructors. These are not exported; they are made available under
+# terse names inside fn(), check(), and type() via `type_vocab` below.
 t_int <- function(len = NULL, min = NULL, max = NULL) new_base_type("integer", len, min, max)
-
-#' @rdname base-types
-#' @export
 t_dbl <- function(len = NULL, min = NULL, max = NULL) new_base_type("double", len, min, max)
-
-#' @rdname base-types
-#' @export
 t_chr <- function(len = NULL, min = NULL, max = NULL) new_base_type("character", len, min, max)
-
-#' @rdname base-types
-#' @export
 t_lgl <- function(len = NULL, min = NULL, max = NULL) new_base_type("logical", len, min, max)
-
-#' @rdname base-types
-#' @export
 t_cpl <- function(len = NULL, min = NULL, max = NULL) new_base_type("complex", len, min, max)
-
-#' @rdname base-types
-#' @export
 t_raw <- function(len = NULL, min = NULL, max = NULL) new_base_type("raw", len, min, max)
-
-#' @rdname base-types
-#' @export
 t_list <- function(len = NULL, min = NULL, max = NULL) new_base_type("list", len, min, max)
 
-#' Allow `NA` values in a type
-#'
-#' A `blaze_type` rejects `NA` by default. `t_na_ok()` returns a copy that
-#' permits `NA`.
-#'
-#' @param type A `blaze_type`.
-#' @return A `blaze_type` that allows `NA`.
-#' @export
-#' @examples
-#' t_na_ok(t_dbl())
 t_na_ok <- function(type) {
   type@na_ok <- TRUE
   type
 }
 
-#' Allow `NULL` (an optional value)
-#'
-#' Returns a copy of `type` that also accepts `NULL`.
-#'
-#' @param type A `blaze_type`.
-#' @return A `blaze_type` that also accepts `NULL`.
-#' @export
-#' @examples
-#' t_opt(t_int())
 t_opt <- function(type) {
   type@optional <- TRUE
   type
 }
 
-#' Refine a type with a predicate
-#'
-#' Refinements add element-wise constraints to a `blaze_type`. Compose them onto
-#' a base type with the pipe, for example `t_int() |> nonneg()`.
-#'
-#' @param type A `blaze_type`.
-#' @return A `blaze_type` with the refinement added.
-#' @name refinements
-#' @examples
-#' t_int() |> nonneg()
-NULL
-
-#' @rdname refinements
-#' @export
 nonneg <- function(type) {
   type@refinements <- c(type@refinements, list(list(kind = "nonneg")))
   type
 }
 
-#' @rdname refinements
-#' @param min,max Inclusive bounds: a numeric range for `in_range()`, or string
-#'   lengths for `nchar_between()`.
-#' @export
 in_range <- function(type, min, max) {
   type@refinements <- c(
     type@refinements,
@@ -127,27 +55,75 @@ in_range <- function(type, min, max) {
   type
 }
 
-#' @rdname refinements
-#' @export
 unique_vals <- function(type) {
   type@refinements <- c(type@refinements, list(list(kind = "unique_vals")))
   type
 }
 
-#' @rdname refinements
-#' @param pattern A regular expression for `regex()`.
-#' @export
 regex <- function(type, pattern) {
   type@refinements <- c(type@refinements, list(list(kind = "regex", pattern = pattern)))
   type
 }
 
-#' @rdname refinements
-#' @export
 nchar_between <- function(type, min, max) {
   type@refinements <- c(
     type@refinements,
     list(list(kind = "nchar_between", min = as.integer(min), max = as.integer(max)))
   )
   type
+}
+
+# The type vocabulary. Terse names resolve to the constructors above only when a
+# type expression is evaluated by fn(), check(), or type(), so they never clash
+# with user or package bindings at the top level.
+type_vocab <- list(
+  int = t_int, dbl = t_dbl, chr = t_chr, lgl = t_lgl,
+  cpl = t_cpl, raw = t_raw, lst = t_list,
+  na_ok = t_na_ok, opt = t_opt,
+  nonneg = nonneg, between = in_range, matches = regex,
+  unique_vals = unique_vals, nchar_between = nchar_between
+)
+
+#' The blaze type vocabulary
+#'
+#' blaze types are written with a small vocabulary that is available inside
+#' [fn()], [check()], and `type()` — never as top-level functions, so the terse
+#' names never clash with base R or other packages. `type()` evaluates a type
+#' expression and returns the resulting `blaze_type`, for building a reusable
+#' type outside those contexts.
+#'
+#' Base types describe a vector of one base type, named as [typeof()] reports it:
+#' `int()`, `dbl()`, `chr()`, `lgl()`, `cpl()`, `raw()`, `lst()`. Each accepts
+#' `len` for an exact length or `min`/`max` for inclusive length bounds.
+#'
+#' Modifiers relax the defaults: `na_ok()` permits `NA`, `opt()` permits `NULL`.
+#'
+#' Refinements add element-wise constraints, composed with the pipe: `nonneg()`,
+#' `between(min, max)`, `matches(pattern)`, `unique_vals()`,
+#' `nchar_between(min, max)`.
+#'
+#' Use [blaze_types()] to list the vocabulary.
+#'
+#' @param expr A type expression such as `int() |> between(0, 1)`.
+#' @return A `blaze_type`.
+#' @aliases int dbl chr lgl cpl raw lst na_ok opt nonneg between matches
+#'   unique_vals nchar_between
+#' @export
+#' @examples
+#' pos_int <- type(int() |> nonneg())
+#' check(5L, int(1))
+type <- function(expr) {
+  eval(substitute(expr), type_vocab, enclos = parent.frame())
+}
+
+#' List the blaze type vocabulary
+#'
+#' @return A character vector of the available type, modifier, and refinement
+#'   names.
+#' @seealso [type()]
+#' @export
+#' @examples
+#' blaze_types()
+blaze_types <- function() {
+  sort(names(type_vocab))
 }

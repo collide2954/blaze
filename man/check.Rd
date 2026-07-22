@@ -9,7 +9,7 @@ check(value, type)
 \arguments{
 \item{value}{A value to check.}
 
-\item{type}{A \code{blaze_type}, such as \code{\link[=t_int]{t_int()}} or \code{\link[=t_chr]{t_chr()}}.}
+\item{type}{A type expression such as \code{int(1)}, or a \code{blaze_type}.}
 }
 \value{
 \code{value}, invisibly, when it conforms to \code{type}.
@@ -19,6 +19,11 @@ Verifies that \code{value} conforms to \code{type}. On a match the value is retu
 invisibly, so \code{check()} can sit inline in a pipeline. On a mismatch an error
 is raised describing what was expected and what was found.
 }
+\details{
+\code{type} is written with the blaze type vocabulary (see \code{\link[=type]{type()}}); for example
+\code{check(x, int() |> between(0, 1))}. A \code{blaze_type} built with \code{\link[=type]{type()}} may be
+passed instead.
+}
 \examples{
-check(1L, t_int())
+check(1L, int(1))
 }

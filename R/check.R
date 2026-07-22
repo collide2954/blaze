@@ -4,13 +4,22 @@
 #' invisibly, so `check()` can sit inline in a pipeline. On a mismatch an error
 #' is raised describing what was expected and what was found.
 #'
+#' `type` is written with the blaze type vocabulary (see [type()]); for example
+#' `check(x, int() |> between(0, 1))`. A `blaze_type` built with [type()] may be
+#' passed instead.
+#'
 #' @param value A value to check.
-#' @param type A `blaze_type`, such as [t_int()] or [t_chr()].
+#' @param type A type expression such as `int(1)`, or a `blaze_type`.
 #' @return `value`, invisibly, when it conforms to `type`.
 #' @export
 #' @examples
-#' check(1L, t_int())
+#' check(1L, int(1))
 check <- function(value, type) {
+  spec <- eval(substitute(type), type_vocab, enclos = parent.frame())
+  check_value(value, spec)
+}
+
+check_value <- function(value, type) {
   if (is.null(value) && type@optional) {
     return(invisible(value))
   }

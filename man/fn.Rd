@@ -23,6 +23,6 @@ ordinary default on an unchecked argument, so a signature can be typed
 incrementally.
 }
 \examples{
-add <- fn(x = t_int(1), y = t_int(1), x + y)
+add <- fn(x = int(1), y = int(1), x + y)
 add(2L, 3L)
 }

@@ -13,7 +13,7 @@
 #'   exit before returning it.
 #' @export
 #' @examples
-#' add <- fn(x = t_int(1), y = t_int(1), x + y)
+#' add <- fn(x = int(1), y = int(1), x + y)
 #' add(2L, 3L)
 fn <- function(...) {
   dots <- as.list(substitute(list(...)))[-1L]
@@ -44,7 +44,7 @@ fn <- function(...) {
   arg_types <- list()
   fmls <- list()
   for (nm in names(arg_exprs)) {
-    value <- tryCatch(eval(arg_exprs[[nm]], env), error = function(e) NULL)
+    value <- tryCatch(eval(arg_exprs[[nm]], type_vocab, enclos = env), error = function(e) NULL)
     if (!is.null(value) && S7::S7_inherits(value, blaze_type)) {
       arg_types[[nm]] <- value
       fmls[nm] <- list(quote(expr = ))
@@ -52,7 +52,7 @@ fn <- function(...) {
       fmls[nm] <- list(arg_exprs[[nm]])
     }
   }
-  return_type <- if (is.null(return_expr)) NULL else eval(return_expr, env)
+  return_type <- if (is.null(return_expr)) NULL else eval(return_expr, type_vocab, enclos = env)
 
   fun <- as.function(c(fmls, list(body_expr)), envir = env)
 
@@ -60,11 +60,11 @@ fn <- function(...) {
   wrapper <- function() {
     exec <- environment()
     for (nm in arg_names) {
-      check(get(nm, envir = exec), arg_types[[nm]])
+      check_value(get(nm, envir = exec), arg_types[[nm]])
     }
     result <- do.call(fun, mget(names(formals(fun)), envir = exec))
     if (!is.null(return_type)) {
-      check(result, return_type)
+      check_value(result, return_type)
     }
     result
   }
