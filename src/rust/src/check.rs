@@ -62,9 +62,20 @@ pub(crate) fn nonneg_violation(has_negative: bool) -> Option<String> {
     }
 }
 
+/// Report a violation when a value falls outside `[min, max]`.
+pub(crate) fn range_violation(out_of_range: bool, min: f64, max: f64) -> Option<String> {
+    if out_of_range {
+        Some(format!("expected values in [{min}, {max}]"))
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{base_violation, length_violation, na_violation, nonneg_violation};
+    use super::{
+        base_violation, length_violation, na_violation, nonneg_violation, range_violation,
+    };
 
     #[test]
     fn ok_when_base_matches() {
@@ -146,6 +157,19 @@ mod tests {
         assert_eq!(
             nonneg_violation(true),
             Some(String::from("expected non-negative values"))
+        );
+    }
+
+    #[test]
+    fn range_ok_when_within_bounds() {
+        assert_eq!(range_violation(false, 0.0, 1.0), None);
+    }
+
+    #[test]
+    fn range_reports_out_of_bounds() {
+        assert_eq!(
+            range_violation(true, 0.0, 1.0),
+            Some(String::from("expected values in [0, 1]"))
         );
     }
 }

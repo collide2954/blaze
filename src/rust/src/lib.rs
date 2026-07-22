@@ -83,6 +83,25 @@ fn blaze_check_nonneg(value: Robj) -> Robj {
     }
 }
 
+/// Check that every element of `value` lies in `[min, max]` (ignoring `NA`),
+/// returning `NULL` when acceptable or a message describing the violation.
+/// @noRd
+#[extendr]
+fn blaze_check_range(value: Robj, min: f64, max: f64) -> Robj {
+    let out_of_range = if let Some(s) = value.as_integer_slice() {
+        s.iter()
+            .any(|&x| !x.is_na() && (f64::from(x) < min || f64::from(x) > max))
+    } else if let Some(s) = value.as_real_slice() {
+        s.iter().any(|&x| !x.is_na() && (x < min || x > max))
+    } else {
+        false
+    };
+    match check::range_violation(out_of_range, min, max) {
+        Some(msg) => msg.into(),
+        None => ().into(),
+    }
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -92,4 +111,5 @@ extendr_module! {
     fn blaze_check_length;
     fn blaze_check_na;
     fn blaze_check_nonneg;
+    fn blaze_check_range;
 }

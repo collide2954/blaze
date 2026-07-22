@@ -3,12 +3,20 @@
 \name{refinements}
 \alias{refinements}
 \alias{nonneg}
+\alias{in_range}
+\alias{unique_vals}
 \title{Refine a type with a predicate}
 \usage{
 nonneg(type)
+
+in_range(type, min, max)
+
+unique_vals(type)
 }
 \arguments{
 \item{type}{A \code{blaze_type}.}
+
+\item{min, max}{Inclusive numeric bounds for \code{in_range()}.}
 }
 \value{
 A \code{blaze_type} with the refinement added.

@@ -34,6 +34,8 @@ check_refinements <- function(value, refinements) {
   for (r in refinements) {
     msg <- switch(r$kind,
       nonneg = blaze_check_nonneg(value),
+      in_range = blaze_check_range(value, r$min, r$max),
+      unique_vals = if (anyDuplicated(value)) "expected unique values" else NULL,
       stop("unknown refinement: ", r$kind)
     )
     if (!is.null(msg)) {

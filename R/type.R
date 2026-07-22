@@ -114,3 +114,21 @@ nonneg <- function(type) {
   type@refinements <- c(type@refinements, list(list(kind = "nonneg")))
   type
 }
+
+#' @rdname refinements
+#' @param min,max Inclusive numeric bounds for `in_range()`.
+#' @export
+in_range <- function(type, min, max) {
+  type@refinements <- c(
+    type@refinements,
+    list(list(kind = "in_range", min = min, max = max))
+  )
+  type
+}
+
+#' @rdname refinements
+#' @export
+unique_vals <- function(type) {
+  type@refinements <- c(type@refinements, list(list(kind = "unique_vals")))
+  type
+}

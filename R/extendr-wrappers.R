@@ -25,4 +25,9 @@ blaze_check_na <- function(value, na_ok) .Call(wrap__blaze_check_na, value, na_o
 #' @noRd
 blaze_check_nonneg <- function(value) .Call(wrap__blaze_check_nonneg, value)
 
+#' Check that every element of `value` lies in `[min, max]` (ignoring `NA`),
+#' returning `NULL` when acceptable or a message describing the violation.
+#' @noRd
+blaze_check_range <- function(value, min, max) .Call(wrap__blaze_check_range, value, min, max)
+
 # nolint end
