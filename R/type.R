@@ -7,7 +7,8 @@ blaze_type <- S7::new_class(
     na_ok = S7::new_property(S7::class_logical, default = FALSE),
     optional = S7::new_property(S7::class_logical, default = FALSE),
     refinements = S7::class_list,
-    columns = S7::class_list
+    columns = S7::class_list,
+    invariants = S7::class_list
   )
 )
 
@@ -80,6 +81,13 @@ frame <- function(...) {
   blaze_type(base = "data.frame", columns = list(...))
 }
 
+# Row / cross-column invariants for a frame. The predicate expressions are
+# captured unevaluated; they reference columns and are checked against the data.
+where <- function(type, ...) {
+  type@invariants <- c(type@invariants, as.list(substitute(list(...)))[-1L])
+  type
+}
+
 # The type vocabulary. Terse names resolve to the constructors above only when a
 # type expression is evaluated by fn(), check(), or type(), so they never clash
 # with user or package bindings at the top level.
@@ -89,7 +97,7 @@ type_vocab <- list(
   na_ok = t_na_ok, opt = t_opt,
   nonneg = nonneg, between = in_range, matches = regex,
   unique_vals = unique_vals, nchar_between = nchar_between,
-  frame = frame
+  frame = frame, where = where
 )
 
 #' The blaze type vocabulary
@@ -112,14 +120,15 @@ type_vocab <- list(
 #'
 #' A data-frame schema is a type too: `frame(id = int(), age = int() |> nonneg())`
 #' checks that a value is a data frame carrying the named columns, each
-#' conforming to its column type.
+#' conforming to its column type. Add row or cross-column invariants with
+#' `where()`, for example `frame(lo = int(), hi = int()) |> where(lo <= hi)`.
 #'
 #' Use [blaze_types()] to list the vocabulary.
 #'
 #' @param expr A type expression such as `int() |> between(0, 1)`.
 #' @return A `blaze_type`.
 #' @aliases int dbl chr lgl cpl raw lst na_ok opt nonneg between matches
-#'   unique_vals nchar_between frame
+#'   unique_vals nchar_between frame where
 #' @export
 #' @examples
 #' pos_int <- type(int() |> nonneg())

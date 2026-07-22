@@ -39,3 +39,22 @@ test_that("a frame type drops into fn()", {
   mean_age <- fn(data = frame(age = int() |> nonneg()), mean(data$age))
   expect_identical(mean_age(data.frame(age = c(2L, 4L))), 3)
 })
+
+test_that("where() enforces row invariants", {
+  ok <- data.frame(lo = c(1L, 2L), hi = c(3L, 4L))
+  bad <- data.frame(lo = c(1L, 5L), hi = c(3L, 4L))
+  expect_identical(check(ok, frame(lo = int(), hi = int()) |> where(lo <= hi)), ok)
+  expect_error(
+    check(bad, frame(lo = int(), hi = int()) |> where(lo <= hi)),
+    "row invariant failed: lo <= hi"
+  )
+})
+
+test_that("where() records invariants and columns still check first", {
+  schema <- type(frame(age = int()) |> where(age >= 0, age <= 120))
+  expect_length(schema@invariants, 2)
+  expect_error(
+    check(data.frame(age = -1L), frame(age = int() |> nonneg()) |> where(age <= 120)),
+    "column `age`: expected non-negative"
+  )
+})

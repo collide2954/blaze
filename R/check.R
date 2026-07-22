@@ -60,6 +60,12 @@ check_frame <- function(value, type) {
       return(sprintf("column `%s`: %s", col, col_msg))
     }
   }
+  for (inv in type@invariants) {
+    ok <- tryCatch(eval(inv, value, enclos = globalenv()), error = function(e) FALSE)
+    if (!isTRUE(all(ok, na.rm = TRUE))) {
+      return(sprintf("row invariant failed: %s", paste(deparse(inv), collapse = " ")))
+    }
+  }
   NULL
 }
 
