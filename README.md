@@ -34,11 +34,11 @@ add(2L, 3L)                                # 5
 add(2L, "x")                               # Error: expected integer, got character
 
 # Data frames ----------------------------------------------------------
-Patient <- frame(
+Patient <- type(frame(
   id  = int() |> unique_vals(),
   age = int() |> between(0, 120),
   grp = fct(c("ctrl", "treat"))
-) |> where(age >= 18)
+) |> where(age >= 18))
 
 check(patients, Patient)
 #> Error: data frame does not conform:
