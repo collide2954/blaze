@@ -65,6 +65,24 @@ fn blaze_check_na(value: Robj, na_ok: bool) -> Robj {
     }
 }
 
+/// Check that `value` has no negative elements (ignoring `NA`), returning
+/// `NULL` when acceptable or a message describing the violation.
+/// @noRd
+#[extendr]
+fn blaze_check_nonneg(value: Robj) -> Robj {
+    let has_negative = if let Some(s) = value.as_integer_slice() {
+        s.iter().any(|&x| !x.is_na() && x < 0)
+    } else if let Some(s) = value.as_real_slice() {
+        s.iter().any(|&x| !x.is_na() && x < 0.0)
+    } else {
+        false
+    };
+    match check::nonneg_violation(has_negative) {
+        Some(msg) => msg.into(),
+        None => ().into(),
+    }
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -73,4 +91,5 @@ extendr_module! {
     fn blaze_check_base;
     fn blaze_check_length;
     fn blaze_check_na;
+    fn blaze_check_nonneg;
 }

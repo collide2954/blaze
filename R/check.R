@@ -21,8 +21,24 @@ check <- function(value, type) {
   if (is.null(msg)) {
     msg <- blaze_check_na(value, type@na_ok)
   }
+  if (is.null(msg)) {
+    msg <- check_refinements(value, type@refinements)
+  }
   if (!is.null(msg)) {
     stop(msg, call. = FALSE)
   }
   invisible(value)
+}
+
+check_refinements <- function(value, refinements) {
+  for (r in refinements) {
+    msg <- switch(r$kind,
+      nonneg = blaze_check_nonneg(value),
+      stop("unknown refinement: ", r$kind)
+    )
+    if (!is.null(msg)) {
+      return(msg)
+    }
+  }
+  NULL
 }

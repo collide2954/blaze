@@ -53,9 +53,18 @@ pub(crate) fn na_violation(has_na: bool, na_ok: bool) -> Option<String> {
     }
 }
 
+/// Report a violation when a negative value is present.
+pub(crate) fn nonneg_violation(has_negative: bool) -> Option<String> {
+    if has_negative {
+        Some(String::from("expected non-negative values"))
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{base_violation, length_violation, na_violation};
+    use super::{base_violation, length_violation, na_violation, nonneg_violation};
 
     #[test]
     fn ok_when_base_matches() {
@@ -125,5 +134,18 @@ mod tests {
     #[test]
     fn no_na_passes() {
         assert_eq!(na_violation(false, false), None);
+    }
+
+    #[test]
+    fn nonneg_ok_when_no_negatives() {
+        assert_eq!(nonneg_violation(false), None);
+    }
+
+    #[test]
+    fn nonneg_reports_negatives() {
+        assert_eq!(
+            nonneg_violation(true),
+            Some(String::from("expected non-negative values"))
+        );
     }
 }

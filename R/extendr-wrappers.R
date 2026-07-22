@@ -20,4 +20,9 @@ blaze_check_length <- function(value, min, max) .Call(wrap__blaze_check_length, 
 #' @noRd
 blaze_check_na <- function(value, na_ok) .Call(wrap__blaze_check_na, value, na_ok)
 
+#' Check that `value` has no negative elements (ignoring `NA`), returning
+#' `NULL` when acceptable or a message describing the violation.
+#' @noRd
+blaze_check_nonneg <- function(value) .Call(wrap__blaze_check_nonneg, value)
+
 # nolint end

@@ -5,7 +5,8 @@ blaze_type <- S7::new_class(
     len_min = S7::class_integer,
     len_max = S7::class_integer,
     na_ok = S7::new_property(S7::class_logical, default = FALSE),
-    optional = S7::new_property(S7::class_logical, default = FALSE)
+    optional = S7::new_property(S7::class_logical, default = FALSE),
+    refinements = S7::class_list
   )
 )
 
@@ -92,5 +93,24 @@ t_na_ok <- function(type) {
 #' t_opt(t_int())
 t_opt <- function(type) {
   type@optional <- TRUE
+  type
+}
+
+#' Refine a type with a predicate
+#'
+#' Refinements add element-wise constraints to a `blaze_type`. Compose them onto
+#' a base type with the pipe, for example `t_int() |> nonneg()`.
+#'
+#' @param type A `blaze_type`.
+#' @return A `blaze_type` with the refinement added.
+#' @name refinements
+#' @examples
+#' t_int() |> nonneg()
+NULL
+
+#' @rdname refinements
+#' @export
+nonneg <- function(type) {
+  type@refinements <- c(type@refinements, list(list(kind = "nonneg")))
   type
 }
