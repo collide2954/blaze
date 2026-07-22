@@ -9,4 +9,9 @@ NULL
 #' @export
 hello_world <- function() .Call(wrap__hello_world)
 
+#' Check the base type of `value` against `expected`, returning `NULL` on a
+#' match or a message describing the mismatch.
+#' @noRd
+blaze_check_base <- function(value, expected) .Call(wrap__blaze_check_base, value, expected)
+
 # nolint end

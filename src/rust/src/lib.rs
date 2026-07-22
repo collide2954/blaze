@@ -1,10 +1,37 @@
 use extendr_api::prelude::*;
 
+mod check;
+
 /// Return string `"Hello world!"` to R.
 /// @export
 #[extendr]
 fn hello_world() -> &'static str {
     "Hello world!"
+}
+
+/// Name the base type of `value` as `typeof()` reports it.
+fn typeof_str(value: &Robj) -> &'static str {
+    match value.rtype() {
+        Rtype::Integers => "integer",
+        Rtype::Doubles => "double",
+        Rtype::Strings => "character",
+        Rtype::Logicals => "logical",
+        Rtype::Complexes => "complex",
+        Rtype::Raw => "raw",
+        Rtype::List => "list",
+        _ => "other",
+    }
+}
+
+/// Check the base type of `value` against `expected`, returning `NULL` on a
+/// match or a message describing the mismatch.
+/// @noRd
+#[extendr]
+fn blaze_check_base(value: Robj, expected: &str) -> Robj {
+    match check::base_violation(typeof_str(&value), expected) {
+        Some(msg) => msg.into(),
+        None => ().into(),
+    }
 }
 
 // Macro to generate exports.
@@ -13,4 +40,5 @@ fn hello_world() -> &'static str {
 extendr_module! {
     mod blaze;
     fn hello_world;
+    fn blaze_check_base;
 }
