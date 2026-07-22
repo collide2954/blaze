@@ -1,17 +1,19 @@
-#' Add a type signature to a function
+#' Define a typed function
 #'
-#' `fn()` wraps a function with runtime type checks. Annotate arguments with
-#' `name ~ type` (or `name = type`) and the return value with `.returns = type`;
-#' the last unnamed argument is the function to wrap. Arguments left unannotated
-#' are not checked, so a signature can be added incrementally.
+#' `fn()` is a drop-in for `function()` that adds runtime type checks. Declare
+#' each argument as `name = type` and give the body as the final, unnamed
+#' argument; use `.returns = type` for the result. An argument whose value is a
+#' `blaze_type` is checked and becomes required; any other `name = value` is an
+#' ordinary default on an unchecked argument, so a signature can be typed
+#' incrementally.
 #'
-#' @param ... Argument annotations such as `x ~ t_int(1)`, an optional
-#'   `.returns` type, and the function to wrap.
-#' @return A function with the same formals that checks its typed arguments on
-#'   entry and its result on exit before returning it.
+#' @param ... Argument declarations such as `x = t_int(1)`, an optional
+#'   `.returns` type, and the body expression as the final unnamed argument.
+#' @return A function that checks its typed arguments on entry and its result on
+#'   exit before returning it.
 #' @export
 #' @examples
-#' add <- fn(x ~ t_int(1), y ~ t_int(1), .returns = t_int(1), function(x, y) x + y)
+#' add <- fn(x = t_int(1), y = t_int(1), x + y)
 #' add(2L, 3L)
 fn <- function(...) {
   dots <- as.list(substitute(list(...)))[-1L]
@@ -19,34 +21,45 @@ fn <- function(...) {
   if (is.null(nms)) nms <- character(length(dots))
   nms[is.na(nms)] <- ""
 
-  arg_type_exprs <- list()
   return_expr <- NULL
   body_expr <- NULL
+  arg_exprs <- list()
   for (i in seq_along(dots)) {
     a <- dots[[i]]
     nm <- nms[i]
     if (identical(nm, ".returns")) {
       return_expr <- a
-    } else if (is.call(a) && identical(a[[1L]], as.name("~"))) {
-      arg_type_exprs[[as.character(a[[2L]])]] <- a[[3L]]
     } else if (nzchar(nm)) {
-      arg_type_exprs[[nm]] <- a
+      arg_exprs[[nm]] <- a
     } else {
       body_expr <- a
     }
   }
   if (is.null(body_expr)) {
-    stop("fn() requires a function to wrap", call. = FALSE)
+    stop("fn() requires a body expression as its final argument", call. = FALSE)
   }
 
   env <- parent.frame()
-  fun <- eval(body_expr, env)
-  arg_types <- lapply(arg_type_exprs, eval, envir = env)
+
+  arg_types <- list()
+  fmls <- list()
+  for (nm in names(arg_exprs)) {
+    value <- tryCatch(eval(arg_exprs[[nm]], env), error = function(e) NULL)
+    if (!is.null(value) && S7::S7_inherits(value, blaze_type)) {
+      arg_types[[nm]] <- value
+      fmls[nm] <- list(quote(expr = ))
+    } else {
+      fmls[nm] <- list(arg_exprs[[nm]])
+    }
+  }
   return_type <- if (is.null(return_expr)) NULL else eval(return_expr, env)
 
+  fun <- as.function(c(fmls, list(body_expr)), envir = env)
+
+  arg_names <- names(arg_types)
   wrapper <- function() {
     exec <- environment()
-    for (nm in names(arg_types)) {
+    for (nm in arg_names) {
       check(get(nm, envir = exec), arg_types[[nm]])
     }
     result <- do.call(fun, mget(names(formals(fun)), envir = exec))

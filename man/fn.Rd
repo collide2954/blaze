@@ -2,25 +2,27 @@
 % Please edit documentation in R/fn.R
 \name{fn}
 \alias{fn}
-\title{Add a type signature to a function}
+\title{Define a typed function}
 \usage{
 fn(...)
 }
 \arguments{
-\item{...}{Argument annotations such as \code{x ~ t_int(1)}, an optional
-\code{.returns} type, and the function to wrap.}
+\item{...}{Argument declarations such as \code{x = t_int(1)}, an optional
+\code{.returns} type, and the body expression as the final unnamed argument.}
 }
 \value{
-A function with the same formals that checks its typed arguments on
-entry and its result on exit before returning it.
+A function that checks its typed arguments on entry and its result on
+exit before returning it.
 }
 \description{
-\code{fn()} wraps a function with runtime type checks. Annotate arguments with
-\code{name ~ type} (or \code{name = type}) and the return value with \code{.returns = type};
-the last unnamed argument is the function to wrap. Arguments left unannotated
-are not checked, so a signature can be added incrementally.
+\code{fn()} is a drop-in for \verb{function()} that adds runtime type checks. Declare
+each argument as \code{name = type} and give the body as the final, unnamed
+argument; use \code{.returns = type} for the result. An argument whose value is a
+\code{blaze_type} is checked and becomes required; any other \code{name = value} is an
+ordinary default on an unchecked argument, so a signature can be typed
+incrementally.
 }
 \examples{
-add <- fn(x ~ t_int(1), y ~ t_int(1), .returns = t_int(1), function(x, y) x + y)
+add <- fn(x = t_int(1), y = t_int(1), x + y)
 add(2L, 3L)
 }
