@@ -1,0 +1,22 @@
+Package: blaze
+Title: Strict Gradual Type Checking
+Version: 0.0.0.9000
+Authors@R:
+    person("Brett", "Gilio", , "giliobrett@gmail.com", role = c("aut", "cre", "cph"))
+Description: A strict, opt-in type system for existing R code. Types are
+    written in ordinary R and enforced at runtime on function arguments,
+    return values, vectors, and data frame columns. The checking engine
+    is implemented in Rust for speed.
+License: Apache License (>= 2)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.0.0
+Config/rextendr/version: 0.5.0
+SystemRequirements: Cargo (Rust's package manager), rustc >= 1.85.0, xz
+Depends:
+    R (>= 4.2)
+Imports:
+    S7
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
