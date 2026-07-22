@@ -41,9 +41,21 @@ pub(crate) fn length_violation(observed: usize, min: &[i32], max: &[i32]) -> Opt
     None
 }
 
+/// Report a violation when a disallowed `NA` is present.
+///
+/// Returns `None` when the value is acceptable (`na_ok`, or no `NA` present),
+/// or a message when an `NA` is present but not allowed.
+pub(crate) fn na_violation(has_na: bool, na_ok: bool) -> Option<String> {
+    if has_na && !na_ok {
+        Some(String::from("unexpected NA"))
+    } else {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{base_violation, length_violation};
+    use super::{base_violation, length_violation, na_violation};
 
     #[test]
     fn ok_when_base_matches() {
@@ -95,5 +107,23 @@ mod tests {
     #[test]
     fn within_bounds_passes() {
         assert_eq!(length_violation(5, &[0], &[10]), None);
+    }
+
+    #[test]
+    fn na_rejected_by_default() {
+        assert_eq!(
+            na_violation(true, false),
+            Some(String::from("unexpected NA"))
+        );
+    }
+
+    #[test]
+    fn na_allowed_when_permitted() {
+        assert_eq!(na_violation(true, true), None);
+    }
+
+    #[test]
+    fn no_na_passes() {
+        assert_eq!(na_violation(false, false), None);
     }
 }

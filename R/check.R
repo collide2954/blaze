@@ -15,6 +15,9 @@ check <- function(value, type) {
   if (is.null(msg)) {
     msg <- blaze_check_length(value, type@len_min, type@len_max)
   }
+  if (is.null(msg)) {
+    msg <- blaze_check_na(value, type@na_ok)
+  }
   if (!is.null(msg)) {
     stop(msg, call. = FALSE)
   }

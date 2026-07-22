@@ -38,6 +38,32 @@ fn blaze_check_length(value: Robj, min: Vec<i32>, max: Vec<i32>) -> Robj {
     }
 }
 
+/// Does `value` contain any R `NA`?
+fn any_na(value: &Robj) -> bool {
+    if let Some(s) = value.as_integer_slice() {
+        s.iter().any(|x| x.is_na())
+    } else if let Some(s) = value.as_real_slice() {
+        s.iter().any(|x| x.is_na())
+    } else if let Some(s) = value.as_logical_slice() {
+        s.iter().any(|x| x.is_na())
+    } else if let Some(v) = value.as_str_vector() {
+        v.iter().any(|x| x.is_na())
+    } else {
+        false
+    }
+}
+
+/// Check `value` for a disallowed `NA`, returning `NULL` when acceptable or a
+/// message describing the violation.
+/// @noRd
+#[extendr]
+fn blaze_check_na(value: Robj, na_ok: bool) -> Robj {
+    match check::na_violation(any_na(&value), na_ok) {
+        Some(msg) => msg.into(),
+        None => ().into(),
+    }
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -45,4 +71,5 @@ extendr_module! {
     mod blaze;
     fn blaze_check_base;
     fn blaze_check_length;
+    fn blaze_check_na;
 }

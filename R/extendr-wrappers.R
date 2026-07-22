@@ -15,4 +15,9 @@ blaze_check_base <- function(value, expected) .Call(wrap__blaze_check_base, valu
 #' @noRd
 blaze_check_length <- function(value, min, max) .Call(wrap__blaze_check_length, value, min, max)
 
+#' Check `value` for a disallowed `NA`, returning `NULL` when acceptable or a
+#' message describing the violation.
+#' @noRd
+blaze_check_na <- function(value, na_ok) .Call(wrap__blaze_check_na, value, na_ok)
+
 # nolint end

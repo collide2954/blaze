@@ -3,7 +3,8 @@ blaze_type <- S7::new_class(
   properties = list(
     base = S7::class_character,
     len_min = S7::class_integer,
-    len_max = S7::class_integer
+    len_max = S7::class_integer,
+    na_ok = S7::new_property(S7::class_logical, default = FALSE)
   )
 )
 
@@ -63,3 +64,18 @@ t_raw <- function(len = NULL, min = NULL, max = NULL) new_base_type("raw", len, 
 #' @rdname base-types
 #' @export
 t_list <- function(len = NULL, min = NULL, max = NULL) new_base_type("list", len, min, max)
+
+#' Allow `NA` values in a type
+#'
+#' A `blaze_type` rejects `NA` by default. `t_na_ok()` returns a copy that
+#' permits `NA`.
+#'
+#' @param type A `blaze_type`.
+#' @return A `blaze_type` that allows `NA`.
+#' @export
+#' @examples
+#' t_na_ok(t_dbl())
+t_na_ok <- function(type) {
+  type@na_ok <- TRUE
+  type
+}
