@@ -51,22 +51,30 @@ check_frame <- function(value, type) {
   if (!is.data.frame(value)) {
     return(sprintf("expected a data frame, got %s", class(value)[1]))
   }
+  problems <- character()
   for (col in names(type@columns)) {
     if (!col %in% names(value)) {
-      return(sprintf("missing column `%s`", col))
+      problems <- c(problems, sprintf("missing column `%s`", col))
+      next
     }
     col_msg <- check_msg(value[[col]], type@columns[[col]])
     if (!is.null(col_msg)) {
-      return(sprintf("column `%s`: %s", col, col_msg))
+      problems <- c(problems, sprintf("column `%s`: %s", col, col_msg))
     }
   }
   for (inv in type@invariants) {
     ok <- tryCatch(eval(inv, value, enclos = globalenv()), error = function(e) FALSE)
     if (!isTRUE(all(ok, na.rm = TRUE))) {
-      return(sprintf("row invariant failed: %s", paste(deparse(inv), collapse = " ")))
+      problems <- c(
+        problems,
+        sprintf("row invariant failed: %s", paste(deparse(inv), collapse = " "))
+      )
     }
   }
-  NULL
+  if (length(problems) == 0L) {
+    return(NULL)
+  }
+  paste0("data frame does not conform:\n", paste0("- ", problems, collapse = "\n"))
 }
 
 check_refinements <- function(value, refinements) {

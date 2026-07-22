@@ -58,3 +58,14 @@ test_that("where() records invariants and columns still check first", {
     "column `age`: expected non-negative"
   )
 })
+
+test_that("check() aggregates all frame violations", {
+  df <- data.frame(id = "a", age = -5L)
+  err <- expect_error(
+    check(df, frame(id = int(), age = int() |> nonneg()) |> where(age <= 120)),
+    "does not conform"
+  )
+  msg <- conditionMessage(err)
+  expect_match(msg, "column `id`")
+  expect_match(msg, "column `age`")
+})
