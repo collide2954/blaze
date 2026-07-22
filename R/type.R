@@ -2,53 +2,64 @@ blaze_type <- S7::new_class(
   "blaze_type",
   properties = list(
     base = S7::class_character,
-    len = S7::class_integer
+    len_min = S7::class_integer,
+    len_max = S7::class_integer
   )
 )
 
-new_base_type <- function(base, len = NULL) {
-  blaze_type(base = base, len = if (is.null(len)) integer() else as.integer(len))
+new_base_type <- function(base, len = NULL, min = NULL, max = NULL) {
+  if (!is.null(len)) {
+    min <- len
+    max <- len
+  }
+  blaze_type(
+    base = base,
+    len_min = if (is.null(min)) integer() else as.integer(min),
+    len_max = if (is.null(max)) integer() else as.integer(max)
+  )
 }
 
 #' Base type constructors
 #'
 #' Each constructor returns a `blaze_type` describing an R vector of a single
-#' base type, named as [typeof()] reports it. Pass `len` to require an exact
-#' length; for example `t_int(1)` is a length-1 integer.
+#' base type, named as [typeof()] reports it. Constrain length with `len` for an
+#' exact length, or `min`/`max` for inclusive bounds; for example `t_int(1)` is a
+#' length-1 integer and `t_chr(min = 1)` is a non-empty character vector.
 #'
 #' @param len Optional exact length the value must have.
+#' @param min,max Optional inclusive length bounds.
 #' @return A `blaze_type` object.
 #' @name base-types
 #' @examples
 #' t_int()
 #' t_int(1)
-#' t_chr()
+#' t_chr(min = 1)
 NULL
 
 #' @rdname base-types
 #' @export
-t_int <- function(len = NULL) new_base_type("integer", len)
+t_int <- function(len = NULL, min = NULL, max = NULL) new_base_type("integer", len, min, max)
 
 #' @rdname base-types
 #' @export
-t_dbl <- function(len = NULL) new_base_type("double", len)
+t_dbl <- function(len = NULL, min = NULL, max = NULL) new_base_type("double", len, min, max)
 
 #' @rdname base-types
 #' @export
-t_chr <- function(len = NULL) new_base_type("character", len)
+t_chr <- function(len = NULL, min = NULL, max = NULL) new_base_type("character", len, min, max)
 
 #' @rdname base-types
 #' @export
-t_lgl <- function(len = NULL) new_base_type("logical", len)
+t_lgl <- function(len = NULL, min = NULL, max = NULL) new_base_type("logical", len, min, max)
 
 #' @rdname base-types
 #' @export
-t_cpl <- function(len = NULL) new_base_type("complex", len)
+t_cpl <- function(len = NULL, min = NULL, max = NULL) new_base_type("complex", len, min, max)
 
 #' @rdname base-types
 #' @export
-t_raw <- function(len = NULL) new_base_type("raw", len)
+t_raw <- function(len = NULL, min = NULL, max = NULL) new_base_type("raw", len, min, max)
 
 #' @rdname base-types
 #' @export
-t_list <- function(len = NULL) new_base_type("list", len)
+t_list <- function(len = NULL, min = NULL, max = NULL) new_base_type("list", len, min, max)

@@ -27,12 +27,12 @@ fn blaze_check_base(value: Robj, expected: &str) -> Robj {
     }
 }
 
-/// Check the length of `value` against `expected` (empty means no constraint),
-/// returning `NULL` on a match or a message describing the mismatch.
+/// Check the length of `value` against `[min, max]` bounds (each empty when
+/// unset), returning `NULL` on a match or a message describing the mismatch.
 /// @noRd
 #[extendr]
-fn blaze_check_length(value: Robj, expected: Vec<i32>) -> Robj {
-    match check::length_violation(value.len(), &expected) {
+fn blaze_check_length(value: Robj, min: Vec<i32>, max: Vec<i32>) -> Robj {
+    match check::length_violation(value.len(), &min, &max) {
         Some(msg) => msg.into(),
         None => ().into(),
     }

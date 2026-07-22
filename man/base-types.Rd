@@ -11,33 +11,36 @@
 \alias{t_list}
 \title{Base type constructors}
 \usage{
-t_int(len = NULL)
+t_int(len = NULL, min = NULL, max = NULL)
 
-t_dbl(len = NULL)
+t_dbl(len = NULL, min = NULL, max = NULL)
 
-t_chr(len = NULL)
+t_chr(len = NULL, min = NULL, max = NULL)
 
-t_lgl(len = NULL)
+t_lgl(len = NULL, min = NULL, max = NULL)
 
-t_cpl(len = NULL)
+t_cpl(len = NULL, min = NULL, max = NULL)
 
-t_raw(len = NULL)
+t_raw(len = NULL, min = NULL, max = NULL)
 
-t_list(len = NULL)
+t_list(len = NULL, min = NULL, max = NULL)
 }
 \arguments{
 \item{len}{Optional exact length the value must have.}
+
+\item{min, max}{Optional inclusive length bounds.}
 }
 \value{
 A \code{blaze_type} object.
 }
 \description{
 Each constructor returns a \code{blaze_type} describing an R vector of a single
-base type, named as \code{\link[=typeof]{typeof()}} reports it. Pass \code{len} to require an exact
-length; for example \code{t_int(1)} is a length-1 integer.
+base type, named as \code{\link[=typeof]{typeof()}} reports it. Constrain length with \code{len} for an
+exact length, or \code{min}/\code{max} for inclusive bounds; for example \code{t_int(1)} is a
+length-1 integer and \code{t_chr(min = 1)} is a non-empty character vector.
 }
 \examples{
 t_int()
 t_int(1)
-t_chr()
+t_chr(min = 1)
 }

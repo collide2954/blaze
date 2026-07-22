@@ -13,7 +13,7 @@
 check <- function(value, type) {
   msg <- blaze_check_base(value, type@base)
   if (is.null(msg)) {
-    msg <- blaze_check_length(value, type@len)
+    msg <- blaze_check_length(value, type@len_min, type@len_max)
   }
   if (!is.null(msg)) {
     stop(msg, call. = FALSE)
